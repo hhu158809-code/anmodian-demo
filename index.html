@@ -1,0 +1,1039 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>按摩店前台系统演示版</title>
+    <style>
+      button, [role="button"], select, summary, input:not([type="checkbox"], [type="radio"]) { min-height: 2.25rem; }
+      * { box-sizing: border-box; }
+      :root {
+        --bg: #eef2ee;
+        --surface: #ffffff;
+        --surface-2: #f5f8f5;
+        --ink: #1c2921;
+        --ink-2: #55645a;
+        --line: #d9e2da;
+        --brand: #0e5a45;
+        --brand-ink: #ffffff;
+        --brand-soft: #e2efe8;
+        --amber: #b97a1e;
+        --amber-soft: #faf0dc;
+        --red: #c0392b;
+        --red-soft: #fbe9e6;
+        --blue: #256d85;
+        --blue-soft: #e3eff4;
+        --shadow: 0 1px 2px rgba(20, 40, 30, .06), 0 4px 14px rgba(20, 40, 30, .05);
+        --radius: 14px;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0f1512;
+          --surface: #182019;
+          --surface-2: #1f2a21;
+          --ink: #e9f0ea;
+          --ink-2: #9db3a4;
+          --line: #2c3a2f;
+          --brand: #2e9c78;
+          --brand-ink: #08130e;
+          --brand-soft: #17382c;
+          --amber: #e0a83f;
+          --amber-soft: #3a2f16;
+          --red: #ef7d6e;
+          --red-soft: #40201c;
+          --blue: #6cb3c9;
+          --blue-soft: #1d3038;
+          --shadow: 0 1px 2px rgba(0,0,0,.4), 0 4px 14px rgba(0,0,0,.3);
+        }
+      }
+      html { -webkit-text-size-adjust: 100%; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+        font-size: 15px;
+        line-height: 1.5;
+      }
+      .num { font-variant-numeric: tabular-nums; }
+      button { font: inherit; cursor: pointer; }
+      input, select, textarea { font: inherit; color: var(--ink); }
+      :focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
+      /* ---------- header ---------- */
+      header.top {
+        background: var(--brand);
+        color: #fff;
+        padding: 14px 16px 12px;
+      }
+      @media (prefers-color-scheme: dark) { header.top { color: #eafff3; } }
+      .top-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; max-width: 1180px; margin: 0 auto; }
+      .shop-name { font-size: 21px; font-weight: 700; letter-spacing: .02em; }
+      .shop-name small { font-size: 12px; font-weight: 500; opacity: .85; margin-left: 8px; letter-spacing: .08em; }
+      .top-clock { font-size: 14px; opacity: .95; }
+      .top-clock b { font-size: 17px; }
+      .demo-tag { display: inline-block; background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.45); color: #fff; font-size: 11.5px; padding: 1px 8px; border-radius: 999px; margin-left: 8px; vertical-align: 2px; }
+
+      /* ---------- tabs ---------- */
+      nav.tabs {
+        position: sticky; top: 0; z-index: 30;
+        background: var(--surface);
+        border-bottom: 1px solid var(--line);
+        box-shadow: 0 1px 0 rgba(0,0,0,.02);
+      }
+      .tabs-in { max-width: 1180px; margin: 0 auto; display: flex; padding: 0 8px; }
+      .tab {
+        flex: 1; border: 0; background: none; color: var(--ink-2);
+        padding: 10px 2px 8px; font-size: 15px; font-weight: 600;
+        border-bottom: 3px solid transparent; min-height: 44px;
+        display: flex; flex-direction: column; align-items: center; gap: 1px;
+      }
+      .tab .badge { font-size: 10.5px; font-weight: 700; background: var(--red); color: #fff; border-radius: 999px; padding: 0 6px; line-height: 16px; }
+      .tab.on { color: var(--brand); border-bottom-color: var(--brand); }
+      .tab .lbl { display: flex; align-items: center; gap: 5px; }
+
+      main { max-width: 1180px; margin: 0 auto; padding: 14px 12px 120px; }
+      .view { display: none; }
+      .view.on { display: block; }
+
+      /* ---------- generic ---------- */
+      .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
+      .btn {
+        border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+        border-radius: 10px; padding: 6px 14px; font-weight: 600; font-size: 14px;
+        display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      }
+      .btn:active { transform: translateY(1px); }
+      .btn.primary { background: var(--brand); border-color: var(--brand); color: var(--brand-ink); }
+      .btn.warn { background: var(--amber-soft); border-color: var(--amber); color: var(--amber); }
+      .btn.danger { background: var(--red-soft); border-color: var(--red); color: var(--red); }
+      .btn.ghost { border-color: transparent; background: transparent; color: var(--ink-2); }
+      .btn.sm { padding: 3px 10px; font-size: 13px; border-radius: 8px; min-height: 32px; }
+      .btn.big { width: 100%; padding: 12px; font-size: 16px; border-radius: 12px; }
+      .btn[disabled] { opacity: .45; cursor: not-allowed; }
+      .sec-title { font-size: 16px; font-weight: 700; margin: 20px 2px 10px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+      .sec-title:first-child { margin-top: 2px; }
+      .sec-title .hint { font-size: 12.5px; color: var(--ink-2); font-weight: 500; }
+      .muted { color: var(--ink-2); }
+      .small { font-size: 12.5px; }
+      .money { font-weight: 700; }
+      .tag { display: inline-block; font-size: 11.5px; font-weight: 700; padding: 1px 8px; border-radius: 999px; line-height: 18px; white-space: nowrap; }
+      .tag.free { background: var(--brand-soft); color: var(--brand); }
+      .tag.busy { background: var(--red-soft); color: var(--red); }
+      .tag.rest { background: var(--surface-2); color: var(--ink-2); border: 1px solid var(--line); }
+      .tag.clean { background: var(--amber-soft); color: var(--amber); }
+      .tag.dian { background: var(--blue-soft); color: var(--blue); }
+      .tag.lun { background: var(--brand-soft); color: var(--brand); }
+      .tag.credit { background: var(--amber-soft); color: var(--amber); }
+
+      /* ---------- stat strip ---------- */
+      .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+      @media (max-width: 640px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+      .stat { padding: 12px 14px; }
+      .stat .k { font-size: 12.5px; color: var(--ink-2); }
+      .stat .v { font-size: 24px; font-weight: 800; margin-top: 2px; }
+      .stat .v em { font-style: normal; font-size: 13px; font-weight: 600; color: var(--ink-2); }
+
+      .lun-banner {
+        margin-top: 12px; padding: 12px 14px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+        background: var(--brand-soft); border: 1px solid var(--brand); border-radius: var(--radius);
+      }
+      .lun-banner .who { font-size: 18px; font-weight: 800; }
+      .lun-banner .why { color: var(--ink-2); font-size: 13px; }
+
+      /* ---------- tech wall ---------- */
+      .tech-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(158px, 1fr)); gap: 10px; }
+      .tech { padding: 12px; position: relative; overflow: hidden; }
+      .tech::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--tc, var(--brand)); }
+      .tech .head { display: flex; align-items: center; gap: 9px; }
+      .avatar {
+        width: 40px; height: 40px; border-radius: 50%; flex: none;
+        display: flex; align-items: center; justify-content: center;
+        color: #fff; font-weight: 800; font-size: 15px; background: var(--tc, var(--brand));
+      }
+      .tech .nm { font-weight: 700; font-size: 16px; }
+      .tech .no { color: var(--ink-2); font-size: 12px; white-space: nowrap; }
+      .tech .nm { white-space: nowrap; }
+      .tech .meta { margin-top: 8px; font-size: 12.5px; color: var(--ink-2); display: flex; justify-content: space-between; }
+      .tech .doing { margin-top: 6px; font-size: 13px; font-weight: 600; }
+      .tech .doing.over { color: var(--red); }
+      .tech .acts { margin-top: 10px; display: flex; gap: 6px; flex-wrap: wrap; }
+
+      /* ---------- rooms ---------- */
+      .room-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; }
+      .room { padding: 10px; text-align: center; border-radius: 12px; }
+      .room .rn { font-weight: 700; font-size: 15px; }
+      .room .rs { font-size: 12px; margin-top: 3px; }
+      .room.st-free { border-color: var(--brand); }
+      .room.st-busy { background: var(--red-soft); }
+      .room.st-clean { background: var(--amber-soft); }
+      .room button { margin-top: 6px; }
+
+      /* ---------- active orders ---------- */
+      .order-card { padding: 14px; margin-bottom: 10px; }
+      .order-top { display: flex; gap: 14px; align-items: center; }
+      .ring-wrap { position: relative; width: 76px; height: 76px; flex: none; }
+      .ring-wrap svg { transform: rotate(-90deg); }
+      .ring-bg { stroke: var(--line); }
+      .ring-fg { stroke: var(--brand); transition: stroke-dashoffset .5s linear; }
+      .ring-wrap.warn .ring-fg { stroke: var(--amber); }
+      .ring-wrap.over .ring-fg { stroke: var(--red); }
+      .ring-txt { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+      .ring-txt .t { font-size: 16px; font-weight: 800; line-height: 1.1; }
+      .ring-txt .s { font-size: 10.5px; color: var(--ink-2); }
+      .ring-wrap.over .t { color: var(--red); animation: blink 1s steps(2) infinite; }
+      .ring-wrap.warn .t { color: var(--amber); }
+      @keyframes blink { 50% { opacity: .35; } }
+      @media (prefers-reduced-motion: reduce) { .ring-wrap.over .t { animation: none; } }
+      .order-info { flex: 1; min-width: 0; }
+      .order-info .l1 { font-size: 16.5px; font-weight: 700; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+      .order-info .l2 { color: var(--ink-2); font-size: 13px; margin-top: 2px; }
+      .order-items { margin-top: 8px; font-size: 13px; color: var(--ink-2); }
+      .order-items span { margin-right: 10px; white-space: nowrap; }
+      .order-acts { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
+      .alert-line { margin-top: 10px; padding: 10px 12px; border-radius: 10px; font-size: 13.5px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+      .alert-line.red { background: var(--red-soft); color: var(--red); font-weight: 600; }
+      .alert-line.amber { background: var(--amber-soft); color: var(--amber); font-weight: 600; }
+
+      /* ---------- lists ---------- */
+      .row-item { padding: 12px 14px; margin-bottom: 8px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+      .row-item .grow { flex: 1; min-width: 160px; }
+      .row-item .t1 { font-weight: 700; }
+      .row-item .t2 { font-size: 12.5px; color: var(--ink-2); margin-top: 1px; }
+
+      /* ---------- tables → cards on mobile ---------- */
+      .tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
+      .tbl th { text-align: left; color: var(--ink-2); font-weight: 600; font-size: 12.5px; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+      .tbl td { padding: 9px 10px; border-bottom: 1px solid var(--line); }
+      .tbl td.r, .tbl th.r { text-align: right; }
+      .paybar { display: flex; height: 12px; border-radius: 6px; overflow: hidden; margin-top: 8px; }
+      .paybar div { height: 100%; }
+
+      /* ---------- modal ---------- */
+      .overlay {
+        position: fixed; inset: 0; background: rgba(10, 20, 14, .55); z-index: 60;
+        display: none; align-items: flex-end; justify-content: center; padding: 0;
+      }
+      .overlay.on { display: flex; }
+      .sheet {
+        background: var(--surface); width: 100%; max-width: 560px; max-height: 92vh; overflow-y: auto;
+        border-radius: 18px 18px 0 0; padding: 18px 16px calc(18px + env(safe-area-inset-bottom));
+      }
+      @media (min-width: 700px) { .overlay { align-items: center; padding: 20px; } .sheet { border-radius: 18px; } }
+      .sheet h3 { margin: 0 0 4px; font-size: 18px; }
+      .sheet .sub { color: var(--ink-2); font-size: 13px; margin-bottom: 12px; }
+      .f-row { margin-bottom: 12px; }
+      .f-row label { display: block; font-size: 13px; font-weight: 600; color: var(--ink-2); margin-bottom: 5px; }
+      .f-row input, .f-row select {
+        width: 100%; padding: 9px 11px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2);
+        min-height: 42px;
+      }
+      .f-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+      .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+      .chip {
+        border: 1.5px solid var(--line); background: var(--surface); border-radius: 999px;
+        padding: 7px 14px; font-weight: 600; font-size: 14px; min-height: 38px;
+      }
+      .chip.on { border-color: var(--brand); background: var(--brand-soft); color: var(--brand); }
+      .chip small { font-weight: 500; color: var(--ink-2); }
+      .steps { display: flex; gap: 6px; margin-bottom: 14px; }
+      .steps div { flex: 1; text-align: center; font-size: 12.5px; font-weight: 700; color: var(--ink-2); padding: 6px 2px; border-bottom: 3px solid var(--line); }
+      .steps div.on { color: var(--brand); border-bottom-color: var(--brand); }
+      .bill-line { display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px; border-bottom: 1px dashed var(--line); }
+      .bill-line.total { border-bottom: 0; font-size: 17px; font-weight: 800; padding-top: 10px; }
+      .pay-row { display: flex; gap: 8px; margin-bottom: 8px; }
+      .pay-row select { flex: 1.1; padding: 8px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); min-height: 42px; }
+      .pay-row input { flex: 1; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); min-height: 42px; width: 0; }
+      .sheet-acts { display: flex; gap: 10px; margin-top: 14px; }
+      .sheet-acts .btn { flex: 1; padding: 11px; }
+      .err { color: var(--red); font-size: 13px; font-weight: 600; min-height: 18px; margin-top: 6px; }
+      .ok-note { background: var(--brand-soft); color: var(--brand); border-radius: 10px; padding: 9px 12px; font-size: 13.5px; font-weight: 600; margin-bottom: 12px; }
+      .warn-note { background: var(--amber-soft); color: var(--amber); border-radius: 10px; padding: 9px 12px; font-size: 13.5px; font-weight: 600; margin-bottom: 12px; }
+
+      /* ---------- FAB / toast ---------- */
+      .fab {
+        position: fixed; right: 16px; bottom: calc(18px + env(safe-area-inset-bottom)); z-index: 40;
+        background: var(--brand); color: var(--brand-ink); border: 0; border-radius: 999px;
+        padding: 14px 22px; font-size: 16px; font-weight: 800; box-shadow: 0 8px 22px rgba(10, 60, 45, .35);
+        min-height: 52px;
+      }
+      #toast {
+        position: fixed; left: 50%; bottom: calc(84px + env(safe-area-inset-bottom)); transform: translateX(-50%) translateY(20px);
+        background: var(--ink); color: var(--bg); padding: 10px 18px; border-radius: 999px; font-size: 14px; font-weight: 600;
+        opacity: 0; pointer-events: none; transition: all .25s; z-index: 90; max-width: 88vw; text-align: center;
+      }
+      #toast.on { opacity: 1; transform: translateX(-50%) translateY(0); }
+      .empty { text-align: center; color: var(--ink-2); padding: 26px 10px; font-size: 14px; }
+      .manage-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
+      .manage-item { padding: 12px 14px; }
+      .manage-item .nm { font-weight: 700; display: flex; align-items: center; gap: 8px; }
+      .dot { width: 12px; height: 12px; border-radius: 50%; flex: none; }
+      .price-edit { display: flex; align-items: center; gap: 6px; margin-top: 8px; }
+      .price-edit input { width: 84px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-2); min-height: 36px; }
+      .kv { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px dashed var(--line); font-size: 14px; }
+      .kv:last-child { border-bottom: 0; }
+      .kv input { width: 76px; text-align: right; padding: 5px 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-2); min-height: 36px; }
+    </style>
+  </head>
+  <body>
+    <header class="top">
+      <div class="top-row">
+        <div class="shop-name">云栖足道<span class="demo-tag">演示版</span><small>前台收银系统</small></div>
+        <div class="top-clock num"><span id="todayStr"></span> · <b id="clockStr">--:--</b> · 晚班</div>
+      </div>
+    </header>
+
+    <nav class="tabs" aria-label="主导航">
+      <div class="tabs-in" id="tabBar">
+        <button class="tab on" data-view="dash"><span class="lbl">前台</span></button>
+        <button class="tab" data-view="orders"><span class="lbl">钟单 <span class="badge" id="badgeActive" hidden>0</span></span></button>
+        <button class="tab" data-view="book"><span class="lbl">预约</span></button>
+        <button class="tab" data-view="member"><span class="lbl">会员</span></button>
+        <button class="tab" data-view="report"><span class="lbl">报表</span></button>
+        <button class="tab" data-view="manage"><span class="lbl">管理</span></button>
+      </div>
+    </nav>
+
+    <main>
+      <!-- ===== 前台 ===== -->
+      <section class="view on" id="view-dash">
+        <div class="stats" id="statStrip"></div>
+        <div class="lun-banner" id="lunBanner"></div>
+
+        <div class="sec-title">技师状态 <span class="hint">一人一色 · 点技师头像可上钟 / 休息切换</span></div>
+        <div class="tech-grid" id="techGrid"></div>
+
+        <div class="sec-title">房间状态 <span class="hint">空闲 → 使用中 → 待清扫 → 空闲</span></div>
+        <div class="room-grid" id="roomGrid"></div>
+
+        <div class="sec-title">排队等候 <span class="hint" id="queueHint"></span>
+          <button class="btn sm" id="btnQueueAdd">+ 登记排队</button>
+        </div>
+        <div id="queueList"></div>
+
+        <div id="alertBox"></div>
+      </section>
+
+      <!-- ===== 钟单 ===== -->
+      <section class="view" id="view-orders">
+        <div class="sec-title">进行中的钟单 <span class="hint">到点变黄、超时变红并提醒</span></div>
+        <div id="activeList"></div>
+        <div class="sec-title">今日已结账</div>
+        <div id="doneList"></div>
+      </section>
+
+      <!-- ===== 预约 ===== -->
+      <section class="view" id="view-book">
+        <div class="sec-title">今日预约 <span class="hint">同一技师同时段自动查撞单</span>
+          <button class="btn sm primary" id="btnBookAdd">+ 新增预约</button>
+        </div>
+        <div id="bookList"></div>
+      </section>
+
+      <!-- ===== 会员 ===== -->
+      <section class="view" id="view-member">
+        <div class="sec-title">会员 <span class="hint">储值余额 / 次卡 / 消费记录</span>
+          <button class="btn sm primary" id="btnMemberAdd">+ 新开会员</button>
+        </div>
+        <div id="memberList"></div>
+      </section>
+
+      <!-- ===== 报表 ===== -->
+      <section class="view" id="view-report">
+        <div class="sec-title">今日对账 <span class="hint">按支付方式汇总，交班直接核对</span></div>
+        <div class="card" style="padding:14px" id="paySummary"></div>
+        <div class="sec-title">技师业绩与提成</div>
+        <div class="card" style="padding:6px 4px; overflow-x:auto" id="perfBox"></div>
+        <div class="sec-title">挂账未结</div>
+        <div id="creditList"></div>
+      </section>
+
+      <!-- ===== 管理 ===== -->
+      <section class="view" id="view-manage">
+        <div class="sec-title">收费规则 <span class="hint">改完立即生效</span></div>
+        <div class="card" style="padding:12px 14px" id="rulesBox"></div>
+
+        <div class="sec-title">项目价目 <span class="hint">可直接改价</span>
+          <button class="btn sm" id="btnProjAdd">+ 加项目</button>
+        </div>
+        <div class="manage-grid" id="projGrid"></div>
+
+        <div class="sec-title">加项商品</div>
+        <div class="manage-grid" id="prodGrid"></div>
+
+        <div class="sec-title">技师名单
+          <button class="btn sm" id="btnTechAdd">+ 加技师</button>
+        </div>
+        <div class="manage-grid" id="techManage"></div>
+
+        <div class="sec-title">房间
+          <button class="btn sm" id="btnRoomAdd">+ 加房间</button>
+        </div>
+        <div class="manage-grid" id="roomManage"></div>
+      </section>
+    </main>
+
+    <button class="fab" id="fabOpen">＋ 开单上钟</button>
+    <div id="toast" role="status"></div>
+    <div class="overlay" id="overlay"><div class="sheet" id="sheet"></div></div>
+
+    <script>
+    "use strict";
+    /* ================= 演示数据 ================= */
+    var now = Date.now();
+    var MIN = 60000;
+    var S = {
+      rules: { lunRate: 12, dianRate: 18, grace: 5, otPer10: 15 },
+      techs: [
+        { id: "t1", no: "01", name: "小芳", color: "#c2517d", status: "busy" },
+        { id: "t2", no: "02", name: "阿杰", color: "#256d85", status: "busy" },
+        { id: "t3", no: "03", name: "丽丽", color: "#7a5fb5", status: "free" },
+        { id: "t4", no: "04", name: "强子", color: "#b97a1e", status: "busy" },
+        { id: "t5", no: "05", name: "小梅", color: "#2e8b6e", status: "free" },
+        { id: "t6", no: "06", name: "阿东", color: "#546e7a", status: "rest" },
+        { id: "t7", no: "07", name: "娜娜", color: "#d2691e", status: "free" },
+        { id: "t8", no: "08", name: "老王", color: "#4a6fa5", status: "busy" }
+      ],
+      rooms: [
+        { id: "r1", name: "兰亭", status: "busy" },
+        { id: "r2", name: "竹韵", status: "busy" },
+        { id: "r3", name: "梅香", status: "free" },
+        { id: "r4", name: "菊雅", status: "busy" },
+        { id: "r5", name: "松风", status: "free" },
+        { id: "r6", name: "云水", status: "clean" },
+        { id: "r7", name: "星辰", status: "free" },
+        { id: "r8", name: "月影", status: "busy" }
+      ],
+      projects: [
+        { id: "p1", name: "足疗保健", mins: 45, price: 98 },
+        { id: "p2", name: "中式推拿", mins: 60, price: 128 },
+        { id: "p3", name: "全身推拿", mins: 90, price: 198 },
+        { id: "p4", name: "精油 SPA", mins: 90, price: 268 },
+        { id: "p5", name: "拔罐刮痧", mins: 30, price: 68 },
+        { id: "p6", name: "采耳修脚", mins: 30, price: 58 }
+      ],
+      products: [
+        { id: "g1", name: "养生茶饮", price: 15 },
+        { id: "g2", name: "进口精油升级", price: 30 },
+        { id: "g3", name: "热石温敷", price: 20 },
+        { id: "g4", name: "生姜足浴包", price: 25 }
+      ],
+      members: [
+        { id: "m1", name: "陈建国", phone: "138****6688", balance: 860, cardProj: "p2", cardLeft: 3, total: 3260, pref: "t1", history: ["11-06 中式推拿 ¥128", "11-10 足疗保健 ¥98", "11-12 充值 ¥500（送¥50）"] },
+        { id: "m2", name: "刘晓芸", phone: "136****2210", balance: 240, cardProj: null, cardLeft: 0, total: 1180, pref: "t3", history: ["11-09 精油 SPA ¥268", "11-12 充值 ¥300"] },
+        { id: "m3", name: "赵大勇", phone: "139****9054", balance: 1520, cardProj: "p1", cardLeft: 6, total: 5980, pref: "t8", history: ["11-05 充值 ¥1000（送¥150）", "11-11 全身推拿 ¥198"] }
+      ],
+      orders: [],
+      queue: [
+        { id: "q1", name: "王先生", projId: "p2", pref: null, at: now - 6 * MIN },
+        { id: "q2", name: "两位女士", projId: "p4", pref: "t3", at: now - 2 * MIN }
+      ],
+      bookings: [
+        { id: "b1", name: "孙女士", phone: "135****4471", techId: "t1", projId: "p4", time: "20:30", status: "待到店" },
+        { id: "b2", name: "周先生", phone: "137****8832", techId: "t8", projId: "p3", time: "21:00", status: "待到店" },
+        { id: "b3", name: "吴小姐", phone: "133****1190", techId: "t3", projId: "p1", time: "19:00", status: "已上钟" }
+      ],
+      seq: 100
+    };
+
+    function mkOrder(o) { S.orders.push(o); return o; }
+    /* 进行中的演示钟单 */
+    mkOrder({ id: "o1", no: "A101", techId: "t1", roomId: "r1", memberId: "m1", guest: "陈先生", type: "点钟",
+      items: [{ name: "中式推拿", price: 128, mins: 60, kind: "proj" }], plannedMins: 60, startedAt: now - 34 * MIN, status: "active", pays: [] });
+    mkOrder({ id: "o2", no: "A102", techId: "t2", roomId: "r2", memberId: null, guest: "李女士", type: "轮钟",
+      items: [{ name: "足疗保健", price: 98, mins: 45, kind: "proj" }, { name: "养生茶饮", price: 15, mins: 0, kind: "goods" }], plannedMins: 45, startedAt: now - 42 * MIN, status: "active", pays: [] });
+    mkOrder({ id: "o3", no: "A103", techId: "t4", roomId: "r4", memberId: null, guest: "张先生", type: "轮钟",
+      items: [{ name: "全身推拿", price: 198, mins: 90, kind: "proj" }], plannedMins: 90, startedAt: now - 98 * MIN, status: "active", pays: [] });
+    mkOrder({ id: "o4", no: "A104", techId: "t8", roomId: "r8", memberId: "m3", guest: "赵先生", type: "点钟",
+      items: [{ name: "精油 SPA", price: 268, mins: 90, kind: "proj" }], plannedMins: 90, startedAt: now - 20 * MIN, status: "active", pays: [] });
+    /* 今日已结账演示单 */
+    function done(no, techId, type, items, pays, agoMin, commission) {
+      mkOrder({ id: "d" + no, no: no, techId: techId, roomId: null, memberId: null, guest: "客人", type: type,
+        items: items, plannedMins: 60, startedAt: now - agoMin * MIN, status: "done", pays: pays, commission: commission, paidAt: now - (agoMin - 60) * MIN });
+    }
+    done("A087", "t3", "轮钟", [{ name: "中式推拿", price: 128, mins: 60, kind: "proj" }], [{ m: "微信", amt: 128 }], 300, 15.36);
+    done("A089", "t5", "点钟", [{ name: "精油 SPA", price: 268, mins: 90, kind: "proj" }, { name: "进口精油升级", price: 30, mins: 0, kind: "goods" }], [{ m: "支付宝", amt: 298 }], 260, 48.24);
+    done("A091", "t1", "点钟", [{ name: "足疗保健", price: 98, mins: 45, kind: "proj" }], [{ m: "会员余额", amt: 98 }], 210, 17.64);
+    done("A093", "t2", "轮钟", [{ name: "全身推拿", price: 198, mins: 90, kind: "proj" }], [{ m: "现金", amt: 100 }, { m: "微信", amt: 98 }], 160, 23.76);
+    done("A095", "t7", "轮钟", [{ name: "拔罐刮痧", price: 68, mins: 30, kind: "proj" }], [{ m: "挂账", amt: 68 }], 120, 8.16);
+    done("A097", "t4", "点钟", [{ name: "中式推拿", price: 128, mins: 60, kind: "proj" }, { name: "热石温敷", price: 20, mins: 0, kind: "goods" }], [{ m: "微信", amt: 148 }], 80, 23.04);
+
+    /* ================= 工具 ================= */
+    function $(s, el) { return (el || document).querySelector(s); }
+    function $$(s, el) { return Array.prototype.slice.call((el || document).querySelectorAll(s)); }
+    function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+    function fmt(n) { return "¥" + (Math.round(n * 100) / 100).toLocaleString("zh-CN", { minimumFractionDigits: 0, maximumFractionDigits: 2 }); }
+    function tech(id) { return S.techs.find(function (t) { return t.id === id; }); }
+    function room(id) { return S.rooms.find(function (r) { return r.id === id; }); }
+    function proj(id) { return S.projects.find(function (p) { return p.id === id; }); }
+    function member(id) { return S.members.find(function (m) { return m.id === id; }); }
+    function orderEnd(o) { return o.startedAt + o.plannedMins * MIN; }
+    function itemsTotal(o) { return o.items.reduce(function (s, i) { return s + i.price; }, 0); }
+    function projTotal(o) { return o.items.filter(function (i) { return i.kind === "proj"; }).reduce(function (s, i) { return s + i.price; }, 0); }
+    function toast(msg) { var t = $("#toast"); t.textContent = msg; t.classList.add("on"); clearTimeout(t._h); t._h = setTimeout(function () { t.classList.remove("on"); }, 2400); }
+    function todayCount(techId) { return S.orders.filter(function (o) { return o.techId === techId && o.status !== "active"; }).length + S.orders.filter(function (o) { return o.techId === techId && o.status === "active"; }).length; }
+    function techDoneCount(techId) { return S.orders.filter(function (o) { return o.techId === techId && o.status === "done"; }).length; }
+    function activeOrderOf(techId) { return S.orders.find(function (o) { return o.techId === techId && o.status === "active"; }); }
+
+    /* ================= 视图切换 ================= */
+    $$("#tabBar .tab").forEach(function (b) {
+      b.addEventListener("click", function () {
+        $$("#tabBar .tab").forEach(function (x) { x.classList.remove("on"); });
+        b.classList.add("on");
+        $$(".view").forEach(function (v) { v.classList.remove("on"); });
+        $("#view-" + b.dataset.view).classList.add("on");
+        $("#fabOpen").style.display = (b.dataset.view === "dash" || b.dataset.view === "orders") ? "" : "none";
+        window.scrollTo(0, 0);
+      });
+    });
+    function goto(view) { $$("#tabBar .tab").find(function (b) { return b.dataset.view === view; }).click(); }
+
+    /* ================= 前台渲染 ================= */
+    function mmss(ms) {
+      var s = Math.ceil(Math.abs(ms) / 1000), m = Math.floor(s / 60), ss = s % 60;
+      return (m < 10 ? "0" : "") + m + ":" + (ss < 10 ? "0" : "") + ss;
+    }
+    function remainState(o) {
+      var left = orderEnd(o) - Date.now();
+      if (left < 0) return { cls: "over", label: "已超时 " + mmss(left) };
+      if (left <= 5 * MIN) return { cls: "warn", label: "剩 " + mmss(left) };
+      return { cls: "", label: "剩 " + mmss(left) };
+    }
+    function nextLun() {
+      var free = S.techs.filter(function (t) { return t.status === "free"; });
+      if (!free.length) return null;
+      free.sort(function (a, b) { return (todayCount(a.id) - todayCount(b.id)) || (techDoneCount(a.id) - techDoneCount(b.id)) || (a.no < b.no ? -1 : 1); });
+      return free[0];
+    }
+    function renderDash() {
+      var act = S.orders.filter(function (o) { return o.status === "active"; });
+      var doneToday = S.orders.filter(function (o) { return o.status === "done"; });
+      var revenue = doneToday.reduce(function (s, o) { return s + o.pays.filter(function (p) { return p.m !== "挂账"; }).reduce(function (a, p) { return a + p.amt; }, 0); }, 0);
+      var freeN = S.techs.filter(function (t) { return t.status === "free"; }).length;
+      $("#statStrip").innerHTML =
+        '<div class="card stat"><div class="k">今日已收营业额</div><div class="v num">' + fmt(revenue) + "</div></div>" +
+        '<div class="card stat"><div class="k">已结账单数</div><div class="v num">' + doneToday.length + ' <em>单</em></div></div>' +
+        '<div class="card stat"><div class="k">正在上钟</div><div class="v num">' + act.length + ' <em>单</em></div></div>' +
+        '<div class="card stat"><div class="k">空闲技师</div><div class="v num">' + freeN + ' <em>/ ' + S.techs.length + ' 人</em></div></div>';
+
+      var nx = nextLun();
+      $("#lunBanner").innerHTML = nx
+        ? '<div>🔔 <span class="why">轮钟推荐 · 下一位</span><br><span class="who">' + esc(nx.no) + "号 " + esc(nx.name) + '</span> <span class="why">今日已做 ' + todayCount(nx.id) + ' 单，全场最少</span></div><button class="btn primary" style="margin-left:auto" onclick="openOrder({techId:\'' + nx.id + '\'})">给 TA 开单</button>'
+        : '<div>🔔 <span class="why">技师全在钟上，新客请先登记排队</span></div><button class="btn primary" style="margin-left:auto" onclick="openQueue()">登记排队</button>';
+
+      $("#techGrid").innerHTML = S.techs.map(function (t) {
+        var o = activeOrderOf(t.id);
+        var stTag = t.status === "free" ? '<span class="tag free">空闲</span>' : t.status === "busy" ? '<span class="tag busy">上钟中</span>' : '<span class="tag rest">休息</span>';
+        var doing = "";
+        if (o) { var rs = remainState(o); doing = '<div class="doing ' + (rs.cls === "over" ? "over" : "") + '" data-doing="' + t.id + '">' + esc(room(o.roomId).name) + " · " + esc(o.items[0].name) + " · " + rs.label + "</div>"; }
+        else if (t.status === "free") doing = '<div class="doing muted">等待派单 · 今日 ' + todayCount(t.id) + " 单</div>";
+        else doing = '<div class="doing muted">休息中，不参与轮钟</div>';
+        var acts = "";
+        if (t.status === "free") acts = '<button class="btn sm primary" onclick="openOrder({techId:\'' + t.id + '\'})">上钟</button><button class="btn sm ghost" onclick="toggleRest(\'' + t.id + '\')">改休息</button>';
+        else if (t.status === "rest") acts = '<button class="btn sm" onclick="toggleRest(\'' + t.id + '\')">回岗</button>';
+        else acts = '<button class="btn sm" onclick="goto(\'orders\')">看钟单</button>';
+        return '<div class="card tech" style="--tc:' + t.color + '"><div class="head"><div class="avatar">' + esc(t.no) + '</div><div><div class="nm">' + esc(t.name) + '</div><div class="no">' + esc(t.no) + ' 号技师</div></div><div style="margin-left:auto">' + stTag + '</div></div>' + doing + '<div class="acts">' + acts + "</div></div>";
+      }).join("");
+
+      $("#roomGrid").innerHTML = S.rooms.map(function (r) {
+        var occ = S.orders.find(function (o) { return o.roomId === r.id && o.status === "active"; });
+        var label = r.status === "free" ? "空闲" : r.status === "busy" ? (occ ? tech(occ.techId).no + "号在钟" : "使用中") : "待清扫";
+        var btn = r.status === "clean" ? '<br><button class="btn sm" onclick="cleanDone(\'' + r.id + '\')">清扫完成</button>' : "";
+        return '<div class="card room st-' + r.status + '"><div class="rn">' + esc(r.name) + '</div><div class="rs muted">' + label + "</div>" + btn + "</div>";
+      }).join("");
+
+      $("#queueHint").textContent = S.queue.length ? S.queue.length + " 组在等" : "暂无人排队";
+      $("#queueList").innerHTML = S.queue.length ? S.queue.map(function (q, i) {
+        var p = proj(q.projId);
+        var free = S.techs.filter(function (t) { return t.status === "free" && (!q.pref || q.pref === t.id); });
+        var act = free.length ? '<button class="btn sm primary" onclick="queueToOrder(\'' + q.id + '\')">安排上钟（' + esc(free[0].name) + '）</button>' : '<span class="small muted">暂无合适空闲技师</span>';
+        return '<div class="card row-item"><span class="tag lun">第 ' + (i + 1) + ' 位</span><div class="grow"><div class="t1">' + esc(q.name) + '</div><div class="t2">想做：' + esc(p.name) + " · " + p.mins + "分钟" + (q.pref ? " · 指定 " + esc(tech(q.pref).name) : " · 不指定技师") + " · 已等 " + Math.max(1, Math.round((Date.now() - q.at) / MIN)) + ' 分钟</div></div>' + act + '<button class="btn sm ghost" onclick="queueDel(\'' + q.id + '\')">离店</button></div>';
+      }).join("") : '<div class="card empty">没有排队客人</div>';
+
+      var alerts = [];
+      act.forEach(function (o) {
+        var rs = remainState(o);
+        if (rs.cls === "over") alerts.push({ cls: "red", txt: "⚠️ " + room(o.roomId).name + " · " + tech(o.techId).name + " 的钟已超时 " + mmss(orderEnd(o) - Date.now()) + "，请联系技师确认是否加钟，别漏单" });
+        else if (rs.cls === "warn") alerts.push({ cls: "amber", txt: "⏰ " + room(o.roomId).name + " · " + tech(o.techId).name + " 的钟 " + rs.label + " 就到点，可提前问客人要不要加钟" });
+      });
+      S.rooms.filter(function (r) { return r.status === "clean"; }).forEach(function (r) { alerts.push({ cls: "amber", txt: "🧹 " + r.name + " 房待清扫，清完点「清扫完成」才能再派房" }); });
+      $("#alertBox").innerHTML = alerts.length ? '<div class="sec-title">前台提醒</div>' + alerts.map(function (a) { return '<div class="alert-line ' + a.cls + '">' + a.txt + "</div>"; }).join("") : "";
+    }
+
+    /* ================= 钟单渲染 ================= */
+    var CIRC = 2 * Math.PI * 30;
+    function renderOrders() {
+      var act = S.orders.filter(function (o) { return o.status === "active"; }).sort(function (a, b) { return orderEnd(a) - orderEnd(b); });
+      var badge = $("#badgeActive");
+      badge.hidden = !act.length; badge.textContent = act.length;
+      $("#activeList").innerHTML = act.length ? act.map(function (o) {
+        var t = tech(o.techId), r = room(o.roomId), rs = remainState(o);
+        var total = o.plannedMins * MIN, left = orderEnd(o) - Date.now();
+        var frac = Math.max(0, Math.min(1, left / total));
+        var m = o.memberId ? member(o.memberId) : null;
+        return '<div class="card order-card"><div class="order-top">' +
+          '<div class="ring-wrap ' + rs.cls + '" data-wrap="' + o.id + '"><svg width="76" height="76"><circle class="ring-bg" cx="38" cy="38" r="30" fill="none" stroke-width="7"/><circle class="ring-fg" data-ring="' + o.id + '" cx="38" cy="38" r="30" fill="none" stroke-width="7" stroke-linecap="round" stroke-dasharray="' + CIRC + '" stroke-dashoffset="' + CIRC * (1 - frac) + '"/></svg><div class="ring-txt"><div class="t num" data-time="' + o.id + '">' + mmss(left) + '</div><div class="s" data-tsub="' + o.id + '">' + (left < 0 ? "超时" : "剩余") + '</div></div></div>' +
+          '<div class="order-info"><div class="l1">' + esc(r.name) + "房 · " + esc(t.no) + "号 " + esc(t.name) + ' <span class="tag ' + (o.type === "点钟" ? "dian" : "lun") + '">' + o.type + '</span></div>' +
+          '<div class="l2">单号 ' + o.no + " · 客人 " + esc(o.guest) + (m ? " · 会员 " + esc(m.name) : "") + " · " + new Date(o.startedAt).toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" }) + " 上钟 · 共 " + o.plannedMins + ' 分钟</div>' +
+          '<div class="order-items">' + o.items.map(function (i) { return "<span>" + esc(i.name) + " " + fmt(i.price) + "</span>"; }).join("") + '<span class="money">小计 ' + fmt(itemsTotal(o)) + "</span></div></div></div>" +
+          '<div class="order-acts"><button class="btn sm" onclick="addClock(\'' + o.id + '\',15)">加钟 15 分</button><button class="btn sm" onclick="addClock(\'' + o.id + '\',30)">加钟 30 分</button><button class="btn sm" onclick="openAddItem(\'' + o.id + '\')">加项目 / 商品</button><button class="btn sm" onclick="openSwapRoom(\'' + o.id + '\')">换房</button><button class="btn sm primary" style="margin-left:auto" onclick="openCheckout(\'' + o.id + '\')">下钟结账</button></div></div>';
+      }).join("") : '<div class="card empty">暂无进行中的钟单，点右下角「开单上钟」开始</div>';
+
+      var doneToday = S.orders.filter(function (o) { return o.status === "done"; }).slice().reverse();
+      $("#doneList").innerHTML = doneToday.length ? doneToday.map(function (o) {
+        var sum = o.pays.reduce(function (s, p) { return s + p.amt; }, 0);
+        var credit = o.pays.some(function (p) { return p.m === "挂账"; });
+        return '<div class="card row-item"><div class="grow"><div class="t1">单号 ' + o.no + " · " + esc(tech(o.techId).name) + ' <span class="tag ' + (o.type === "点钟" ? "dian" : "lun") + '">' + o.type + '</span>' + (credit ? ' <span class="tag credit">含挂账</span>' : "") + '</div><div class="t2">' + o.items.map(function (i) { return esc(i.name); }).join("、") + " · " + o.pays.map(function (p) { return p.m + " " + fmt(p.amt); }).join(" + ") + '</div></div><div class="money num">' + fmt(sum) + '</div><button class="btn sm ghost" onclick="refundOrder(\'' + o.id + '\')">退款</button></div>';
+      }).join("") : '<div class="card empty">今天还没有结账单</div>';
+    }
+
+    /* ================= 预约 / 会员 / 报表 / 管理 渲染 ================= */
+    function renderBooks() {
+      var list = S.bookings.filter(function (b) { return b.status !== "已取消"; });
+      $("#bookList").innerHTML = list.length ? list.map(function (b) {
+        var t = tech(b.techId), p = proj(b.projId);
+        var btns = b.status === "待到店"
+          ? '<button class="btn sm primary" onclick="bookArrive(\'' + b.id + '\')">到店上钟</button><button class="btn sm ghost" onclick="bookCancel(\'' + b.id + '\')">取消</button>'
+          : '<span class="tag free">已上钟</span>';
+        return '<div class="card row-item"><div style="text-align:center;min-width:58px"><div class="num" style="font-size:19px;font-weight:800">' + esc(b.time) + '</div><div class="small muted">预约</div></div><div class="grow"><div class="t1">' + esc(b.name) + ' <span class="muted small">' + esc(b.phone) + '</span></div><div class="t2">' + esc(p.name) + " · " + p.mins + " 分钟 · 指定 " + esc(t.no) + "号 " + esc(t.name) + "</div></div>" + btns + "</div>";
+      }).join("") : '<div class="card empty">今天暂无预约</div>';
+    }
+    function renderMembers() {
+      $("#memberList").innerHTML = S.members.map(function (m) {
+        var card = m.cardProj ? proj(m.cardProj).name + " 次卡剩 " + m.cardLeft + " 次" : "无次卡";
+        return '<div class="card row-item"><div class="avatar" style="--tc:var(--brand);background:var(--brand)">' + esc(m.name.charAt(0)) + '</div><div class="grow"><div class="t1">' + esc(m.name) + ' <span class="muted small">' + esc(m.phone) + '</span></div><div class="t2">偏好技师：' + (m.pref ? esc(tech(m.pref).name) : "无") + " · 累计消费 " + fmt(m.total) + " · " + card + '</div><div class="t2">' + m.history.slice(-2).map(esc).join("；") + '</div></div><div style="text-align:right"><div class="small muted">储值余额</div><div class="money num" style="font-size:19px">' + fmt(m.balance) + '</div></div><button class="btn sm warn" onclick="openRecharge(\'' + m.id + '\')">充值</button></div>';
+      }).join("");
+    }
+    function renderReport() {
+      var doneToday = S.orders.filter(function (o) { return o.status === "done"; });
+      var byPay = {};
+      doneToday.forEach(function (o) { o.pays.forEach(function (p) { byPay[p.m] = (byPay[p.m] || 0) + p.amt; }); });
+      var totalAll = Object.keys(byPay).reduce(function (s, k) { return s + byPay[k]; }, 0);
+      var colors = { "微信": "#2e9c5b", "支付宝": "#2b7cd3", "现金": "#b97a1e", "会员余额": "#7a5fb5", "银行卡": "#546e7a", "挂账": "#c0392b" };
+      var rows = Object.keys(byPay).sort(function (a, b) { return byPay[b] - byPay[a]; }).map(function (k) {
+        return '<div class="kv"><span><span class="dot" style="display:inline-block;background:' + (colors[k] || "#999") + ';margin-right:7px"></span>' + esc(k) + '</span><b class="num">' + fmt(byPay[k]) + "</b></div>";
+      }).join("");
+      var bar = '<div class="paybar">' + Object.keys(byPay).map(function (k) { return '<div style="width:' + (totalAll ? byPay[k] / totalAll * 100 : 0) + '%;background:' + (colors[k] || "#999") + '"></div>'; }).join("") + "</div>";
+      $("#paySummary").innerHTML = '<div class="kv" style="font-size:16px"><span><b>今日总营业额（含挂账）</b></span><b class="num">' + fmt(totalAll) + '</b></div>' + rows + bar + '<div class="small muted" style="margin-top:8px">实收（不含挂账）' + fmt(totalAll - (byPay["挂账"] || 0)) + " · 交班时按上面各渠道金额与 POS 机 / 收款码后台逐项核对</div>";
+
+      var perf = S.techs.map(function (t) {
+        var os = doneToday.filter(function (o) { return o.techId === t.id; });
+        return { t: t, n: os.length, rev: os.reduce(function (s, o) { return s + itemsTotal(o); }, 0), com: os.reduce(function (s, o) { return s + (o.commission || 0); }, 0) };
+      }).sort(function (a, b) { return b.rev - a.rev; });
+      $("#perfBox").innerHTML = '<table class="tbl"><thead><tr><th>技师</th><th class="r">单数</th><th class="r">业绩</th><th class="r">提成</th></tr></thead><tbody>' +
+        perf.map(function (x) { return "<tr><td>" + esc(x.t.no) + "号 " + esc(x.t.name) + '</td><td class="r num">' + x.n + '</td><td class="r num">' + fmt(x.rev) + '</td><td class="r num">' + fmt(x.com) + "</td></tr>"; }).join("") +
+        '<tr><td><b>合计</b></td><td class="r num"><b>' + doneToday.length + '</b></td><td class="r num"><b>' + fmt(perf.reduce(function (s, x) { return s + x.rev; }, 0)) + '</b></td><td class="r num"><b>' + fmt(perf.reduce(function (s, x) { return s + x.com; }, 0)) + "</b></td></tr></tbody></table>" +
+        '<div class="small muted" style="padding:8px 10px">提成规则：轮钟 ' + S.rules.lunRate + "% · 点钟 " + S.rules.dianRate + "%（按项目金额计，商品不计提成）</div>";
+
+      var credits = doneToday.filter(function (o) { return o.pays.some(function (p) { return p.m === "挂账"; }); });
+      $("#creditList").innerHTML = credits.length ? credits.map(function (o) {
+        var amt = o.pays.filter(function (p) { return p.m === "挂账"; }).reduce(function (s, p) { return s + p.amt; }, 0);
+        return '<div class="card row-item"><div class="grow"><div class="t1">单号 ' + o.no + " · " + esc(o.guest) + '</div><div class="t2">' + esc(tech(o.techId).name) + " · " + o.items.map(function (i) { return esc(i.name); }).join("、") + '</div></div><div class="money num">' + fmt(amt) + '</div><button class="btn sm primary" onclick="settleCredit(\'' + o.id + '\')">结清（现金）</button></div>';
+      }).join("") : '<div class="card empty">暂无挂账</div>';
+    }
+    function renderManage() {
+      $("#rulesBox").innerHTML =
+        '<div class="kv"><span>轮钟提成比例</span><span><input type="number" id="ruleLun" value="' + S.rules.lunRate + '" min="0" max="60"> %</span></div>' +
+        '<div class="kv"><span>点钟提成比例</span><span><input type="number" id="ruleDian" value="' + S.rules.dianRate + '" min="0" max="60"> %</span></div>' +
+        '<div class="kv"><span>超时宽限（分钟内不收费）</span><span><input type="number" id="ruleGrace" value="' + S.rules.grace + '" min="0" max="30"> 分钟</span></div>' +
+        '<div class="kv"><span>超时费（每 10 分钟）</span><span><input type="number" id="ruleOt" value="' + S.rules.otPer10 + '" min="0" max="100"> 元</span></div>' +
+        '<button class="btn primary" style="margin-top:12px" onclick="saveRules()">保存规则</button>';
+      $("#projGrid").innerHTML = S.projects.map(function (p) {
+        return '<div class="card manage-item"><div class="nm">' + esc(p.name) + '</div><div class="small muted">' + p.mins + ' 分钟</div><div class="price-edit">¥ <input type="number" value="' + p.price + '" onchange="projPrice(\'' + p.id + '\', this.value)"> <button class="btn sm ghost" onclick="delProj(\'' + p.id + '\')">删除</button></div></div>';
+      }).join("");
+      $("#prodGrid").innerHTML = S.products.map(function (g) {
+        return '<div class="card manage-item"><div class="nm">' + esc(g.name) + '</div><div class="price-edit">¥ <input type="number" value="' + g.price + '" onchange="prodPrice(\'' + g.id + '\', this.value)"></div></div>';
+      }).join("");
+      $("#techManage").innerHTML = S.techs.map(function (t) {
+        return '<div class="card manage-item"><div class="nm"><span class="dot" style="background:' + t.color + '"></span>' + esc(t.no) + "号 " + esc(t.name) + '</div><div class="small muted" style="margin-top:4px">今日 ' + todayCount(t.id) + " 单 · 已结提成 " + fmt(S.orders.filter(function (o) { return o.techId === t.id && o.status === "done"; }).reduce(function (s, o) { return s + (o.commission || 0); }, 0)) + "</div></div>";
+      }).join("");
+      $("#roomManage").innerHTML = S.rooms.map(function (r) {
+        return '<div class="card manage-item"><div class="nm">' + esc(r.name) + '房</div><div class="small muted" style="margin-top:4px">状态：' + (r.status === "free" ? "空闲" : r.status === "busy" ? "使用中" : "待清扫") + "</div></div>";
+      }).join("");
+    }
+    function renderAll() { renderDash(); renderOrders(); renderBooks(); renderMembers(); renderReport(); renderManage(); }
+
+    /* ================= 弹窗框架 ================= */
+    var overlay = $("#overlay"), sheet = $("#sheet");
+    function openSheet(html) { sheet.innerHTML = html; overlay.classList.add("on"); }
+    function closeSheet() { overlay.classList.remove("on"); sheet.innerHTML = ""; }
+    overlay.addEventListener("click", function (e) { if (e.target === overlay) closeSheet(); });
+    function sheetActs(okLabel, okFn) {
+      return '<div class="sheet-acts"><button class="btn" onclick="closeSheet()">取消</button><button class="btn primary" onclick="' + okFn + '">' + okLabel + "</button></div>";
+    }
+    function chipGroup(id, options, selVal) {
+      return '<div class="chips" id="' + id + '">' + options.map(function (op) {
+        return '<button type="button" class="chip' + (String(op.v) === String(selVal) ? " on" : "") + '" data-v="' + esc(op.v) + '" onclick="pickChip(this)">' + op.label + "</button>";
+      }).join("") + "</div>";
+    }
+    function pickChip(el) { $$( ".chip", el.parentElement).forEach(function (c) { c.classList.remove("on"); }); el.classList.add("on"); }
+    function chipVal(id) { var c = $("#" + id + " .chip.on"); return c ? c.dataset.v : null; }
+
+    /* ================= 开单 ================= */
+    var draft = {};
+    function openOrder(pre) {
+      pre = pre || {};
+      var nx = nextLun();
+      draft = { techId: pre.techId || (nx ? nx.id : null), projId: pre.projId || "p2", roomId: pre.roomId || null, type: pre.type || (pre.techId ? "点钟" : "轮钟"), memberId: pre.memberId || "", fromQueue: pre.fromQueue || null, fromBook: pre.fromBook || null, guest: pre.guest || "" };
+      var freeRooms = S.rooms.filter(function (r) { return r.status === "free"; });
+      if (!draft.roomId && freeRooms.length) draft.roomId = freeRooms[0].id;
+      var techOpts = S.techs.filter(function (t) { return t.status !== "busy"; }).map(function (t) {
+        return { v: t.id, label: esc(t.no) + "号 " + esc(t.name) + (t.status === "rest" ? " <small>休息中不可选</small>" : t.id === (nx && nx.id) ? " <small>轮钟推荐</small>" : "") };
+      });
+      openSheet(
+        "<h3>开单上钟</h3><div class=\"sub\">三步开单：选项目 → 选技师房间 → 确认上钟</div>" +
+        '<div class="f-row"><label>项目</label>' + chipGroup("dProj", S.projects.map(function (p) { return { v: p.id, label: esc(p.name) + " <small>" + p.mins + "分 · ¥" + p.price + "</small>" }; }), draft.projId) + "</div>" +
+        '<div class="f-row"><label>技师（休息中的不可选，全忙时请先排队）</label>' + (techOpts.length ? chipGroup("dTech", techOpts, draft.techId) : '<div class="warn-note">现在没有可用技师</div>') + "</div>" +
+        '<div class="f-row"><label>派单方式</label>' + chipGroup("dType", [{ v: "轮钟", label: "轮钟 <small>提成 " + S.rules.lunRate + "%</small>" }, { v: "点钟", label: "点钟 <small>客人指定 · 提成 " + S.rules.dianRate + "%</small>" }], draft.type) + "</div>" +
+        '<div class="f-row"><label>房间（只能选空闲房）</label>' + (freeRooms.length ? chipGroup("dRoom", freeRooms.map(function (r) { return { v: r.id, label: esc(r.name) + "房" }; }), draft.roomId) : '<div class="warn-note">没有空闲房间：有房在待清扫，清完才能开单</div>') + "</div>" +
+        '<div class="f-2col"><div class="f-row"><label>客人称呼</label><input id="dGuest" placeholder="如：王先生" value="' + esc(draft.guest) + '"></div>' +
+        '<div class="f-row"><label>会员（可选）</label><select id="dMember"><option value="">散客</option>' + S.members.map(function (m) { return '<option value="' + m.id + '"' + (draft.memberId === m.id ? " selected" : "") + ">" + esc(m.name) + " · 余额 " + fmt(m.balance) + "</option>"; }).join("") + "</select></div></div>" +
+        '<div class="err" id="dErr"></div>' + sheetActs("确认上钟", "submitOrder()")
+      );
+      $$("#dProj .chip").forEach(function (c) { c.addEventListener("click", function () { draft.projId = c.dataset.v; }); });
+      $$("#dTech .chip").forEach(function (c) { c.addEventListener("click", function () { if (tech(c.dataset.v).status === "rest") { toast("该技师休息中，不能派单"); return; } draft.techId = c.dataset.v; draft.type = c.dataset.v === (nx && nx.id) ? "轮钟" : "点钟"; var tc = $("#dType .chip[data-v='" + draft.type + "']"); if (tc) pickChip(tc); }); });
+      $$("#dType .chip").forEach(function (c) { c.addEventListener("click", function () { draft.type = c.dataset.v; }); });
+      $$("#dRoom .chip").forEach(function (c) { c.addEventListener("click", function () { draft.roomId = c.dataset.v; }); });
+    }
+    function submitOrder() {
+      var err = $("#dErr");
+      if (!draft.techId) { err.textContent = "还没选技师"; return; }
+      var t = tech(draft.techId);
+      if (t.status === "busy") { err.textContent = t.name + " 正在上钟，不能重复派单"; return; }
+      if (t.status === "rest") { err.textContent = t.name + " 休息中，不能派单"; return; }
+      if (!draft.roomId) { err.textContent = "还没选房间，或没有空闲房"; return; }
+      var r = room(draft.roomId);
+      if (r.status !== "free") { err.textContent = r.name + "房当前是「" + (r.status === "busy" ? "使用中" : "待清扫") + "」，不能开单"; return; }
+      var p = proj(draft.projId);
+      var guest = $("#dGuest").value.trim() || draft.guest || "客人";
+      var o = mkOrder({ id: "o" + (++S.seq), no: "A" + (100 + S.seq - 100 + 5), techId: draft.techId, roomId: draft.roomId, memberId: $("#dMember").value || null, guest: guest, type: draft.type, items: [{ name: p.name, price: p.price, mins: p.mins, kind: "proj" }], plannedMins: p.mins, startedAt: Date.now(), status: "active", pays: [] });
+      o.no = "A" + (105 + S.orders.filter(function (x) { return x.status === "active"; }).length + Math.floor(Math.random() * 3));
+      t.status = "busy"; r.status = "busy";
+      if (draft.fromQueue) S.queue = S.queue.filter(function (q) { return q.id !== draft.fromQueue; });
+      if (draft.fromBook) { var b = S.bookings.find(function (x) { return x.id === draft.fromBook; }); if (b) b.status = "已上钟"; }
+      closeSheet(); renderAll(); goto("orders");
+      toast("已上钟：" + r.name + "房 · " + t.name + " · " + p.name);
+    }
+    $("#fabOpen").addEventListener("click", function () { openOrder({}); });
+    $("#btnQueueAdd").addEventListener("click", function () { openQueue(); });
+
+    /* ================= 钟单操作 ================= */
+    function addClock(orderId, mins) {
+      var o = S.orders.find(function (x) { return x.id === orderId; });
+      var main = o.items.find(function (i) { return i.kind === "proj"; });
+      /* 按主项目单价折算加钟费 */
+      var base = S.projects.find(function (p) { return p.name === main.name; });
+      var price = base ? Math.round(base.price / base.mins * mins) : Math.round(2 * mins);
+      o.items.push({ name: "加钟 " + mins + " 分钟", price: price, mins: mins, kind: "proj" });
+      o.plannedMins += mins; renderAll(); toast("已加钟 " + mins + " 分钟，加收 " + fmt(price));
+    }
+    function openAddItem(orderId) {
+      var opts = S.projects.map(function (p) { return { v: "p:" + p.id, label: esc(p.name) + " <small>项目 ¥" + p.price + "</small>" }; })
+        .concat(S.products.map(function (g) { return { v: "g:" + g.id, label: esc(g.name) + " <small>商品 ¥" + g.price + "</small>" }; }));
+      openSheet("<h3>加项目 / 商品</h3><div class=\"sub\">项目会同时增加时长，商品只加金额</div>" +
+        '<div class="f-row">' + chipGroup("aiPick", opts, opts[0].v) + "</div>" +
+        sheetActs("确认添加", "submitAddItem('" + orderId + "')"));
+    }
+    function submitAddItem(orderId) {
+      var v = chipVal("aiPick"), o = S.orders.find(function (x) { return x.id === orderId; });
+      var kind = v.split(":")[0], id = v.split(":")[1];
+      if (kind === "p") { var p = proj(id); o.items.push({ name: p.name, price: p.price, mins: p.mins, kind: "proj" }); o.plannedMins += p.mins; }
+      else { var g = S.products.find(function (x) { return x.id === id; }); o.items.push({ name: g.name, price: g.price, mins: 0, kind: "goods" }); }
+      closeSheet(); renderAll(); toast("已添加");
+    }
+    function openSwapRoom(orderId) {
+      var free = S.rooms.filter(function (r) { return r.status === "free"; });
+      if (!free.length) { toast("没有空闲房间可换"); return; }
+      openSheet("<h3>换房</h3><div class=\"sub\">原房间会转为待清扫</div>" +
+        '<div class="f-row">' + chipGroup("swRoom", free.map(function (r) { return { v: r.id, label: esc(r.name) + "房" }; }), free[0].id) + "</div>" +
+        sheetActs("确认换房", "submitSwap('" + orderId + "')"));
+    }
+    function submitSwap(orderId) {
+      var o = S.orders.find(function (x) { return x.id === orderId; });
+      var old = room(o.roomId), nw = room(chipVal("swRoom"));
+      old.status = "clean"; nw.status = "busy"; o.roomId = nw.id;
+      closeSheet(); renderAll(); toast("已换到 " + nw.name + "房");
+    }
+    function toggleRest(techId) { var t = tech(techId); t.status = t.status === "rest" ? "free" : "rest"; renderAll(); toast(t.name + (t.status === "rest" ? " 已设为休息" : " 已回岗")); }
+    function cleanDone(roomId) { var r = room(roomId); r.status = "free"; renderAll(); toast(r.name + "房已恢复空闲"); }
+
+    /* ================= 排队 ================= */
+    function openQueue() {
+      openSheet("<h3>登记排队</h3><div class=\"sub\">技师全忙时先登记，有空位按顺序安排</div>" +
+        '<div class="f-row"><label>客人称呼</label><input id="qName" placeholder="如：王先生 / 两位女士"></div>' +
+        '<div class="f-row"><label>想做的项目</label>' + chipGroup("qProj", S.projects.map(function (p) { return { v: p.id, label: esc(p.name) + " <small>¥" + p.price + "</small>" }; }), "p2") + "</div>" +
+        '<div class="f-row"><label>指定技师（可选）</label><select id="qPref"><option value="">不指定，先到先做</option>' + S.techs.map(function (t) { return '<option value="' + t.id + '">' + esc(t.no) + "号 " + esc(t.name) + "</option>"; }).join("") + "</select></div>" +
+        '<div class="err" id="qErr"></div>' + sheetActs("登记排队", "submitQueue()"));
+    }
+    function submitQueue() {
+      var name = $("#qName").value.trim();
+      if (!name) { $("#qErr").textContent = "请填客人称呼"; return; }
+      S.queue.push({ id: "q" + (++S.seq), name: name, projId: chipVal("qProj"), pref: $("#qPref").value || null, at: Date.now() });
+      closeSheet(); renderAll(); toast("已登记排队：第 " + S.queue.length + " 位");
+    }
+    function queueDel(id) { S.queue = S.queue.filter(function (q) { return q.id !== id; }); renderAll(); }
+    function queueToOrder(id) {
+      var q = S.queue.find(function (x) { return x.id === id; });
+      var free = S.techs.filter(function (t) { return t.status === "free" && (!q.pref || q.pref === t.id); });
+      openOrder({ techId: free[0].id, projId: q.projId, type: q.pref ? "点钟" : "轮钟", guest: q.name, fromQueue: id });
+    }
+
+    /* ================= 结账 ================= */
+    var co = null;
+    function otFee(o) {
+      var overMin = (Date.now() - orderEnd(o)) / MIN;
+      if (overMin <= S.rules.grace) return { fee: 0, overMin: Math.max(0, Math.floor(overMin)) };
+      return { fee: Math.ceil((overMin - S.rules.grace) / 10) * S.rules.otPer10, overMin: Math.floor(overMin) };
+    }
+    function openCheckout(orderId) {
+      var o = S.orders.find(function (x) { return x.id === orderId; });
+      var ot = otFee(o);
+      co = { orderId: orderId, discount: 0, otFee: ot.fee, useCard: false };
+      var m = o.memberId ? member(o.memberId) : null;
+      var cardOption = "";
+      if (m && m.cardProj && m.cardLeft > 0 && o.items.some(function (i) { return i.name === proj(m.cardProj).name; })) {
+        cardOption = '<div class="ok-note">会员 ' + esc(m.name) + " 有「" + esc(proj(m.cardProj).name) + "」次卡剩 " + m.cardLeft + ' 次，可抵扣该项目一次 <label style="display:flex;gap:8px;align-items:center;margin-top:6px"><input type="checkbox" id="coCard" style="width:20px;height:20px" onchange="co.useCard=this.checked;drawCheckout()"> 使用次卡抵扣</label></div>';
+      }
+      openSheet("<h3>下钟结账</h3><div class=\"sub\">三步结账：核单 → 优惠 → 支付</div>" +
+        '<div class="steps"><div class="on">1 核单</div><div class="on">2 优惠</div><div class="on">3 支付</div></div>' +
+        cardOption + '<div id="coBody"></div>' +
+        '<div class="f-row" style="margin-top:12px"><label>优惠 / 抹零</label><div style="display:flex;gap:8px"><input type="number" id="coDisc" value="0" min="0" placeholder="优惠金额" onchange="co.discount=Math.max(0,+this.value||0);drawCheckout()"><button class="btn warn" onclick="autoRound()">一键抹零</button></div></div>' +
+        '<div class="f-row"><label>支付方式（一单可多付，拼满应付即可）</label><div id="coPays"></div><button class="btn sm" onclick="addPayRow()">+ 再加一种支付</button></div>' +
+        '<div class="err" id="coErr"></div>' +
+        '<div class="sheet-acts"><button class="btn" onclick="closeSheet()">返回</button><button class="btn primary" onclick="submitCheckout()">确认结账</button></div>');
+      addPayRow("微信");
+      if (m) addPayRow("会员余额");
+      drawCheckout();
+    }
+    function coPayable() {
+      var o = S.orders.find(function (x) { return x.id === co.orderId; });
+      var base = itemsTotal(o) + co.otFee;
+      if (co.useCard && o.memberId) { var m = member(o.memberId); base -= proj(m.cardProj).price; }
+      return Math.max(0, base - co.discount);
+    }
+    function drawCheckout() {
+      var o = S.orders.find(function (x) { return x.id === co.orderId; });
+      var lines = o.items.map(function (i) { return '<div class="bill-line"><span>' + esc(i.name) + (i.mins ? ' <span class="muted small">' + i.mins + "分钟</span>" : "") + "</span><span class=\"num\">" + fmt(i.price) + "</span></div>"; }).join("");
+      var ot = otFee(o); co.otFee = ot.fee;
+      if (ot.fee > 0) lines += '<div class="bill-line"><span>超时费 <span class="muted small">超时 ' + ot.overMin + " 分钟，宽限 " + S.rules.grace + " 分钟后每10分钟 " + fmt(S.rules.otPer10) + '</span></span><span class="num">' + fmt(ot.fee) + "</span></div>";
+      if (co.useCard) lines += '<div class="bill-line"><span>次卡抵扣</span><span class="num">−' + fmt(proj(member(o.memberId).cardProj).price) + "</span></div>";
+      if (co.discount > 0) lines += '<div class="bill-line"><span>优惠 / 抹零</span><span class="num">−' + fmt(co.discount) + "</span></div>";
+      var paid = $$("#coPays .pay-amt").reduce(function (s, i) { return s + (+i.value || 0); }, 0);
+      lines += '<div class="bill-line total"><span>应付</span><span class="num">' + fmt(coPayable()) + '</span></div><div class="bill-line"><span class="muted">已录入支付</span><span class="num">' + fmt(paid) + " · 还差 " + fmt(Math.max(0, coPayable() - paid)) + "</span></div>";
+      $("#coBody").innerHTML = lines;
+    }
+    function autoRound() {
+      var o = S.orders.find(function (x) { return x.id === co.orderId; });
+      var base = itemsTotal(o) + otFee(o).fee;
+      if (co.useCard && o.memberId) base -= proj(member(o.memberId).cardProj).price;
+      co.discount = Math.round((base - Math.floor(base / 10) * 10) * 100) / 100;
+      if (co.discount === 0) co.discount = base % 1;
+      $("#coDisc").value = co.discount;
+      drawCheckout(); toast("已抹零 " + fmt(co.discount));
+    }
+    function addPayRow(method) {
+      var methods = ["微信", "支付宝", "现金", "银行卡", "会员余额", "挂账"];
+      var row = document.createElement("div"); row.className = "pay-row";
+      row.innerHTML = '<select class="pay-m">' + methods.map(function (x) { return '<option' + (x === method ? " selected" : "") + ">" + x + "</option>"; }).join("") + '</select><input type="number" class="pay-amt" placeholder="金额" min="0" oninput="drawCheckout()"><button class="btn sm ghost" onclick="this.parentElement.remove();drawCheckout()">✕</button>';
+      $("#coPays").appendChild(row);
+    }
+    function submitCheckout() {
+      var o = S.orders.find(function (x) { return x.id === co.orderId; });
+      var err = $("#coErr"), payable = coPayable();
+      var pays = $$("#coPays .pay-row").map(function (r) { return { m: $(".pay-m", r).value, amt: +$(".pay-amt", r).value || 0 }; }).filter(function (p) { return p.amt > 0; });
+      var sum = pays.reduce(function (s, p) { return s + p.amt; }, 0);
+      if (Math.abs(sum - payable) > 0.001) { err.textContent = "支付合计 " + fmt(sum) + " ≠ 应付 " + fmt(payable) + "，对不上不能结账"; return; }
+      var m = o.memberId ? member(o.memberId) : null;
+      var balPay = pays.filter(function (p) { return p.m === "会员余额"; }).reduce(function (s, p) { return s + p.amt; }, 0);
+      if (balPay > 0) {
+        if (!m) { err.textContent = "散客没有会员余额，请换支付方式"; return; }
+        if (balPay > m.balance) { err.textContent = "会员余额不足（剩 " + fmt(m.balance) + "）"; return; }
+      }
+      var rate = (o.type === "点钟" ? S.rules.dianRate : S.rules.lunRate) / 100;
+      o.commission = Math.round(projTotal(o) * rate * 100) / 100;
+      if (co.useCard && m) { o.commission = Math.round((projTotal(o) - proj(m.cardProj).price) * rate * 100) / 100; m.cardLeft -= 1; m.history.push("次卡抵扣 " + proj(m.cardProj).name + " 1 次"); }
+      if (balPay > 0) { m.balance -= balPay; m.history.push("消费抵扣 " + fmt(balPay)); }
+      if (m) { m.total += payable; }
+      o.pays = pays; o.status = "done"; o.paidAt = Date.now();
+      tech(o.techId).status = "free";
+      room(o.roomId).status = "clean"; o.roomId = null;
+      closeSheet(); renderAll(); goto("orders");
+      toast("结账完成 " + fmt(payable) + " · 技师提成 " + fmt(o.commission) + " · 房间转待清扫");
+    }
+    function refundOrder(orderId) {
+      var o = S.orders.find(function (x) { return x.id === orderId; });
+      var bal = o.pays.filter(function (p) { return p.m === "会员余额"; }).reduce(function (s, p) { return s + p.amt; }, 0);
+      openSheet("<h3>确认退款？</h3><div class=\"sub\">单号 " + o.no + " · 合计 " + fmt(o.pays.reduce(function (s, p) { return s + p.amt; }, 0)) + (bal ? "，其中会员余额 " + fmt(bal) + " 将自动退回会员账户" : "") + "。退款后该单将从今日报表中移除，提成同步扣除。</div>" +
+        '<div class="sheet-acts"><button class="btn" onclick="closeSheet()">不退了</button><button class="btn danger" onclick="doRefund(\'' + orderId + '\')">确认退款</button></div>');
+    }
+    function doRefund(orderId) {
+      var idx = S.orders.findIndex(function (x) { return x.id === orderId; });
+      var o = S.orders[idx];
+      var bal = o.pays.filter(function (p) { return p.m === "会员余额"; }).reduce(function (s, p) { return s + p.amt; }, 0);
+      if (bal && o.memberId) { var m = member(o.memberId); m.balance += bal; m.history.push("退款退回 " + fmt(bal)); }
+      S.orders.splice(idx, 1);
+      closeSheet(); renderAll(); toast("已退款，报表已更新");
+    }
+    function settleCredit(orderId) {
+      var o = S.orders.find(function (x) { return x.id === orderId; });
+      o.pays = o.pays.map(function (p) { return p.m === "挂账" ? { m: "现金", amt: p.amt } : p; });
+      renderAll(); toast("挂账已结清，转为现金收入");
+    }
+
+    /* ================= 预约 ================= */
+    function bookConflict(techId, time, projId) {
+      var start = parseInt(time.split(":")[0]) * 60 + parseInt(time.split(":")[1]);
+      var dur = proj(projId).mins;
+      return S.bookings.some(function (b) {
+        if (b.techId !== techId || b.status !== "待到店") return false;
+        var bs = parseInt(b.time.split(":")[0]) * 60 + parseInt(b.time.split(":")[1]);
+        return start < bs + proj(b.projId).mins && bs < start + dur;
+      });
+    }
+    function timeOptions(sel) {
+      var out = "";
+      for (var h = 10; h <= 22; h++) { ["00", "30"].forEach(function (mm) { var t = h + ":" + mm; out += '<option' + (t === sel ? " selected" : "") + ">" + t + "</option>"; }); }
+      return out;
+    }
+    function openBook() {
+      openSheet("<h3>新增预约</h3><div class=\"sub\">选好技师和时间后会自动查撞单</div>" +
+        '<div class="f-2col"><div class="f-row"><label>客人姓名</label><input id="bName" placeholder="如：孙女士"></div><div class="f-row"><label>电话</label><input id="bPhone" placeholder="手机号"></div></div>' +
+        '<div class="f-row"><label>项目</label>' + chipGroup("bProj", S.projects.map(function (p) { return { v: p.id, label: esc(p.name) + " <small>" + p.mins + "分</small>" }; }), "p2") + "</div>" +
+        '<div class="f-2col"><div class="f-row"><label>指定技师</label><select id="bTech" onchange="checkBookConflict()">' + S.techs.map(function (t) { return '<option value="' + t.id + '">' + esc(t.no) + "号 " + esc(t.name) + "</option>"; }).join("") + '</select></div>' +
+        '<div class="f-row"><label>到店时间（今日）</label><select id="bTime" onchange="checkBookConflict()">' + timeOptions("20:00") + "</select></div></div>" +
+        '<div id="bWarn"></div><div class="err" id="bErr"></div>' + sheetActs("保存预约", "submitBook()"));
+    }
+    function checkBookConflict() {
+      var warn = bookConflict($("#bTech").value, $("#bTime").value, chipVal("bProj") || "p2");
+      $("#bWarn").innerHTML = warn ? '<div class="warn-note">⚠️ 撞单提醒：该技师在此时段已有预约，两个单会重叠，请改时间或换技师</div>' : "";
+      return warn;
+    }
+    function submitBook() {
+      var name = $("#bName").value.trim();
+      if (!name) { $("#bErr").textContent = "请填客人姓名"; return; }
+      if (checkBookConflict()) { $("#bErr").textContent = "时段撞单了，先处理上面的提醒"; return; }
+      var phone = $("#bPhone").value.trim();
+      var masked = phone.length >= 7 ? phone.slice(0, 3) + "****" + phone.slice(-4) : (phone || "未留电话");
+      S.bookings.push({ id: "b" + (++S.seq), name: name, phone: masked, techId: $("#bTech").value, projId: chipVal("bProj"), time: $("#bTime").value, status: "待到店" });
+      S.bookings.sort(function (a, b) { return a.time < b.time ? -1 : 1; });
+      closeSheet(); renderAll();
+      toast("预约已保存");
+    }
+    $("#btnBookAdd").addEventListener("click", openBook);
+    function bookArrive(id) {
+      var b = S.bookings.find(function (x) { return x.id === id; });
+      var t = tech(b.techId);
+      if (t.status === "busy") { toast(t.name + " 正在上钟，先登记或稍等"); S.queue.push({ id: "q" + (++S.seq), name: b.name, projId: b.projId, pref: b.techId, at: Date.now() }); b.status = "已上钟"; renderAll(); return; }
+      openOrder({ techId: b.techId, projId: b.projId, type: "点钟", guest: b.name, fromBook: id });
+    }
+    function bookCancel(id) { var b = S.bookings.find(function (x) { return x.id === id; }); b.status = "已取消"; renderAll(); toast("预约已取消"); }
+
+    /* ================= 会员 ================= */
+    function openMember() {
+      openSheet("<h3>新开会员</h3><div class=\"sub\">开卡即建档，后续消费、偏好技师都会记在这里</div>" +
+        '<div class="f-2col"><div class="f-row"><label>姓名</label><input id="mName" placeholder="会员姓名"></div><div class="f-row"><label>手机号</label><input id="mPhone" placeholder="手机号"></div></div>' +
+        '<div class="f-row"><label>首次充值</label>' + chipGroup("mAmt", [{ v: 300, label: "¥300" }, { v: 500, label: "¥500 <small>送¥50</small>" }, { v: 1000, label: "¥1000 <small>送¥150</small>" }, { v: 2000, label: "¥2000 <small>送¥400</small>" }], 500) + "</div>" +
+        '<div class="err" id="mErr"></div>' + sheetActs("开卡并充值", "submitMember()"));
+    }
+    function bonusFor(amt) { return amt >= 2000 ? 400 : amt >= 1000 ? 150 : amt >= 500 ? 50 : 0; }
+    function submitMember() {
+      var name = $("#mName").value.trim();
+      if (!name) { $("#mErr").textContent = "请填姓名"; return; }
+      var phone = $("#mPhone").value.trim();
+      var masked = phone.length >= 7 ? phone.slice(0, 3) + "****" + phone.slice(-4) : (phone || "未留电话");
+      var amt = +chipVal("mAmt"), bonus = bonusFor(amt);
+      S.members.unshift({ id: "m" + (++S.seq), name: name, phone: masked, balance: amt + bonus, cardProj: null, cardLeft: 0, total: 0, pref: null, history: ["开卡充值 ¥" + amt + (bonus ? "（送¥" + bonus + "）" : "")] });
+      closeSheet(); renderAll(); toast("会员 " + name + " 已开卡，到账 " + fmt(amt + bonus));
+    }
+    $("#btnMemberAdd").addEventListener("click", openMember);
+    function openRecharge(memberId) {
+      var m = member(memberId);
+      openSheet("<h3>会员充值 · " + esc(m.name) + '</h3><div class="sub">当前余额 ' + fmt(m.balance) + " · 充500送50 / 充1000送150 / 充2000送400</div>" +
+        '<div class="f-row">' + chipGroup("rAmt", [{ v: 300, label: "¥300" }, { v: 500, label: "¥500 <small>送¥50</small>" }, { v: 1000, label: "¥1000 <small>送¥150</small>" }, { v: 2000, label: "¥2000 <small>送¥400</small>" }], 500) + "</div>" +
+        sheetActs("确认充值", "submitRecharge('" + memberId + "')"));
+    }
+    function submitRecharge(memberId) {
+      var m = member(memberId), amt = +chipVal("rAmt"), bonus = bonusFor(amt);
+      m.balance += amt + bonus;
+      m.history.push("充值 ¥" + amt + (bonus ? "（送¥" + bonus + "）" : ""));
+      closeSheet(); renderAll(); toast("充值成功，到账 " + fmt(amt + bonus) + "，余额 " + fmt(m.balance));
+    }
+
+    /* ================= 管理 ================= */
+    function saveRules() {
+      S.rules.lunRate = Math.max(0, +$("#ruleLun").value || 0);
+      S.rules.dianRate = Math.max(0, +$("#ruleDian").value || 0);
+      S.rules.grace = Math.max(0, +$("#ruleGrace").value || 0);
+      S.rules.otPer10 = Math.max(0, +$("#ruleOt").value || 0);
+      renderAll(); toast("收费规则已保存，立即生效");
+    }
+    function projPrice(id, v) { var p = proj(id); p.price = Math.max(0, +v || 0); renderDash(); renderReport(); toast(p.name + " 价格已改为 " + fmt(p.price)); }
+    function prodPrice(id, v) { var g = S.products.find(function (x) { return x.id === id; }); g.price = Math.max(0, +v || 0); toast(g.name + " 价格已更新"); }
+    function delProj(id) {
+      if (S.projects.length <= 1) { toast("至少保留一个项目"); return; }
+      S.projects = S.projects.filter(function (p) { return p.id !== id; }); renderManage(); toast("项目已删除");
+    }
+    $("#btnProjAdd").addEventListener("click", function () {
+      openSheet("<h3>新增项目</h3>" +
+        '<div class="f-row"><label>项目名</label><input id="npName" placeholder="如：艾灸调理"></div>' +
+        '<div class="f-2col"><div class="f-row"><label>时长（分钟）</label><input id="npMins" type="number" value="60"></div><div class="f-row"><label>价格（元）</label><input id="npPrice" type="number" value="128"></div></div>' +
+        sheetActs("添加", "submitProj()"));
+    });
+    function submitProj() {
+      var name = $("#npName").value.trim(); if (!name) { toast("请填项目名"); return; }
+      S.projects.push({ id: "p" + (++S.seq), name: name, mins: Math.max(5, +$("#npMins").value || 60), price: Math.max(0, +$("#npPrice").value || 0) });
+      closeSheet(); renderManage(); toast("项目已添加");
+    }
+    $("#btnTechAdd").addEventListener("click", function () {
+      openSheet("<h3>新增技师</h3>" +
+        '<div class="f-2col"><div class="f-row"><label>工号</label><input id="ntNo" placeholder="如：09"></div><div class="f-row"><label>名字</label><input id="ntName" placeholder="如：小云"></div></div>' +
+        sheetActs("添加", "submitTech()"));
+    });
+    function submitTech() {
+      var name = $("#ntName").value.trim(), no = $("#ntNo").value.trim();
+      if (!name || !no) { toast("工号和名字都要填"); return; }
+      var palette = ["#c2517d", "#256d85", "#7a5fb5", "#b97a1e", "#2e8b6e", "#546e7a", "#d2691e", "#4a6fa5"];
+      S.techs.push({ id: "t" + (++S.seq), no: no, name: name, color: palette[S.techs.length % palette.length], status: "free" });
+      closeSheet(); renderAll(); toast("技师 " + name + " 已加入");
+    }
+    $("#btnRoomAdd").addEventListener("click", function () {
+      openSheet("<h3>新增房间</h3><div class=\"f-row\"><label>房间名</label><input id=\"nrName\" placeholder=\"如：荷风\"></div>" + sheetActs("添加", "submitRoom()"));
+    });
+    function submitRoom() {
+      var name = $("#nrName").value.trim(); if (!name) { toast("请填房间名"); return; }
+      S.rooms.push({ id: "r" + (++S.seq), name: name, status: "free" });
+      closeSheet(); renderAll(); toast("房间已添加");
+    }
+
+    /* ================= 时钟与初始化 ================= */
+    function tickClock() {
+      var d = new Date();
+      $("#clockStr").textContent = d.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
+      $("#todayStr").textContent = d.toLocaleDateString("zh-CN", { month: "long", day: "numeric", weekday: "long" });
+    }
+    renderAll(); tickClock();
+    setInterval(tickClock, 1000);
+    var tickN = 0;
+    setInterval(function () {
+      /* 每秒原地更新倒计时（不重建 DOM，不打断点击和输入）；每 20 秒整页对齐一次 */
+      S.orders.filter(function (o) { return o.status === "active"; }).forEach(function (o) {
+        var left = orderEnd(o) - Date.now(), rs = remainState(o);
+        var te = document.querySelector('[data-time="' + o.id + '"]');
+        if (te) te.textContent = mmss(left);
+        var sub = document.querySelector('[data-tsub="' + o.id + '"]');
+        if (sub) sub.textContent = left < 0 ? "超时" : "剩余";
+        var ring = document.querySelector('[data-ring="' + o.id + '"]');
+        if (ring) { var frac = Math.max(0, Math.min(1, left / (o.plannedMins * MIN))); ring.style.strokeDashoffset = CIRC * (1 - frac); }
+        var wrap = document.querySelector('[data-wrap="' + o.id + '"]');
+        if (wrap) wrap.className = "ring-wrap " + rs.cls;
+        var doing = document.querySelector('[data-doing="' + o.techId + '"]');
+        if (doing) { doing.textContent = room(o.roomId).name + " · " + o.items[0].name + " · " + rs.label; doing.className = "doing" + (rs.cls === "over" ? " over" : ""); }
+      });
+      tickN++;
+      if (tickN % 20 === 0 && !overlay.classList.contains("on") && document.activeElement.tagName !== "INPUT" && document.activeElement.tagName !== "SELECT") { renderDash(); renderOrders(); }
+    }, 1000);
+    </script>
+  </body>
+</html>
